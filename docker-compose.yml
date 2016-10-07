@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - "./.data/db:/var/lib/mysql"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ehlplugin_ddb
+      MYSQL_USER: ehlplugin
+      MYSQL_PASSWORD: ehlplugin
+    ports:
+      - "3307:3306"
+
+  web:
+    build: ./docker/web
+    volumes:
+      - "./:/var/www/html"
+      - "./docker/web/apache.conf:/etc/apache2/sites-enabled/000-default.conf"
+    #command: php -S 0.0.0.0:8000 -t /app
+    links:
+      - db
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+
+  gulp:
+    build: ./docker/gulp
+    volumes:
+      - "./:/src"
+    command: >
+       gulp watch
+
